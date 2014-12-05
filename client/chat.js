@@ -17,7 +17,7 @@ chatApp.controller('chatController', ['$window', '$scope',
     };
 
     $scope.connect = function() {
-      $scope.socket = new WebSocket("ws://echo.websocket.org");
+      $scope.socket = new WebSocket("ws://localhost:12345");
 
       $scope.socket.onopen = function(event) {
         $scope.is_connected = true;
