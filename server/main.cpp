@@ -9,20 +9,39 @@
 #include <map>
 #include <list>
 
+#include "Context.hpp"
 #include "Room.hpp"
-#include "Message.hpp"
+#include "Messages.hpp"
 
 #include "websocketpp/config/asio_no_tls.hpp"
 #include "websocketpp/server.hpp"
 
 #include "picojson.h"
 
+namespace chat {
+
+
+picojson::object parse_json_message(const std::string& str) {
+  std::istringstream buf(str);
+  picojson::value v;
+  std::string err;
+  err = picojson::parse(v, buf);
+  if(err.empty() && v.is<picojson::object>()) {
+    return v.get<picojson::object>();
+  } else {
+    throw std::runtime_error("Unable to parse JSON string");
+  }
+};
+
 
 class ChatServer {
-typedef websocketpp::server<websocketpp::config::asio> Server;
+typedef Context::ServerType Server;
 public:
 
   explicit ChatServer(unsigned int port) {
+
+    Context::RoomsType& rooms = context.rooms;
+    Context::ServerType& server = context.server;
 
     rooms["lobby"] = Room();
 
@@ -35,45 +54,44 @@ public:
   };
 
   void run() {
-    server.run();
+    context.server.run();
   };
 
 
 private:
-
-  picojson::value parse_message(const std::string& str) {
-    std::istringstream buf(str);
-    picojson::value v;
-    std::string err;
-    err = picojson::parse(v, buf);
-    if(err.empty() && v.is<picojson::object>()) {
-      return v;
-    } else {
-      throw std::runtime_error("Unable to parse JSON string");
-    }
-  };
 
   void on_message(websocketpp::connection_hdl hdl, Server::message_ptr msg) {
     std::cout << msg->get_payload() << std::endl;
 
     try {
 
-      auto val = parse_message(msg->get_payload());
-      auto msg = create_message<ChatServer>(val);
+      auto val = parse_json_message(msg->get_payload());
+      msg_manager.process_message(context, val);
+
+      //auto msg = create_message<ChatServer>(val);
 
     } catch( const std::exception& ex) {
       std::cerr << ex.what() << std::endl;
     };
   };
 
-  Server server;
+  Context context;
+  MessageManager msg_manager;
 
-  std::map<std::string, Room> rooms;
+  //Server server;
+
+  //std::map<std::string, Room> rooms;
 };
+
+}
+
+
+
+
 
 int main() {
 
-  ChatServer server(12345);
+  chat::ChatServer server(12345);
   server.run();
 
 }

@@ -6,6 +6,7 @@
 
 #include "websocketpp/server.hpp"
 
+namespace chat {
 
 struct User {
   std::string name;
@@ -20,6 +21,8 @@ struct Room {
 
 };
 
+
+}
 
 
 
