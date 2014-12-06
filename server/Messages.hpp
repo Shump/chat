@@ -23,14 +23,37 @@ namespace chat {
 
 
 struct TestMessageHandler {
-  void operator()(Context& ctx, const picojson::object& obj) {
+  void operator()(Context& ctx, websocketpp::connection_hdl hdl, const picojson::object& obj) {
     std::cout << "TestMessageHandler called!" << std::endl;
   };
 };
 
 struct RegisterMessageHandler {
-  void operator()(Context& ctx, const picojson::object& obj) {
+  void operator()(Context& ctx, websocketpp::connection_hdl hdl, const picojson::object& obj) {
     std::cout << "Register called!" << std::endl;
+  };
+};
+
+struct TextMessageHandler {
+  void operator()(Context& ctx, websocketpp::connection_hdl hdl, const picojson::object& obj) {
+    std::cout << "Text message recieved!" << std::endl;
+  };
+};
+
+struct UsersMessageHandler {
+  void operator()(Context& ctx, websocketpp::connection_hdl hdl, const picojson::object& obj) {
+    std::cout << "Users command recieved!" << std::endl;
+  };
+};
+
+struct RoomsMessageHandler {
+  void operator()(Context& ctx, websocketpp::connection_hdl hdl, const picojson::object& obj) {
+    std::cout << "Rooms command recieved!" << std::endl;
+
+    for( auto room_pair : ctx.rooms) {
+      std::cout << room_pair.first << std::endl;
+    };
+
   };
 };
 
@@ -43,10 +66,13 @@ public:
 
     handlers["test"] = TestMessageHandler();
     handlers["register"] = RegisterMessageHandler();
+    handlers["text"] = TextMessageHandler();
+    handlers["users"] = UsersMessageHandler();
+    handlers["rooms"] = RoomsMessageHandler();
 
   };
 
-  void process_message(Context& ctx, const picojson::object& obj) {
+  void process_message(Context& ctx, websocketpp::connection_hdl con_hdl, const picojson::object& obj) {
 
     if(priv::key_exists(obj, std::string("type")) &&
         obj.at("type").is<std::string>()) {
@@ -55,7 +81,7 @@ public:
 
       if(priv::key_exists(handlers, type)) {
         auto hdl = handlers.at(type);
-        hdl(ctx, obj);
+        hdl(ctx, con_hdl, obj);
       } else {
         std::cerr << "Error: no handler for type: " + type << std::endl;
       };
@@ -70,7 +96,7 @@ public:
 
 private:
 
-  typedef std::map<std::string, std::function<void(Context&, const picojson::object&)>> HandlerMap;
+  typedef std::map<std::string, std::function<void(Context&, websocketpp::connection_hdl, const picojson::object&)>> HandlerMap;
   HandlerMap handlers;
 
 

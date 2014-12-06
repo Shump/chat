@@ -56,6 +56,28 @@ chatApp.controller('chatController', ['$window', '$scope',
         }
       };
 
+      var usersCommand = function(args) {
+        if(args.length != 0) {
+          throw "Error: users command does not take any parameters!";
+        } else {
+          return {
+            user: $scope.username,
+            type: "users"
+          };
+        }
+      };
+
+      var roomsCommand = function(args) {
+        if(args.length != 0) {
+          throw "Error: rooms-command does not take any parameters!";
+        } else {
+          return {
+            user: $scope.username,
+            type: "rooms"
+          };
+        }
+      };
+
       var splitted = text.trim().split(' ');
       var cmd = splitted[0];
       var args = splitted.slice(1);
@@ -64,6 +86,10 @@ chatApp.controller('chatController', ['$window', '$scope',
         return joinRoomCommand(args);
       } else if(cmd == "\\create") {
         return createRoomCommand(args);
+      } else if(cmd == "\\users") {
+        return usersCommand(args);
+      } else if(cmd == "\\rooms") {
+        return roomsCommand(args);
       } else {
         throw "Error: Invalid command: " + cmd;
       }
