@@ -1,4 +1,13 @@
 
+
+if(typeof String.prototype.startsWith != 'function') {
+  String.prototype.startsWith = function(str){
+    return this.slice(0, str.length) == str;
+  };
+}
+
+
+
 var chatApp = angular.module('chatClient', []);
 
 chatApp.controller('chatController', ['$window', '$scope', 
@@ -7,13 +16,78 @@ chatApp.controller('chatController', ['$window', '$scope',
 
     $scope.messages = [];
 
-    $scope.send_message = function() {
-      var message = {
+    var createMessage = function(text) {
+      return {
         user: $scope.username,
-        url: $scope.url,
-        text: $scope.msg_text
+        text: text,
+        type: "text"
       };
-      $scope.socket.send("test");
+    };
+
+    var createCommand = function(text) {
+      var registerCommand = function() {
+        return {
+          user: $scope.username,
+          type: "register"
+        };
+      };
+
+      var createRoomCommand = function(args) {
+        if(args.length != 1) {
+          throw "Error: create room command requires one parameter only!";
+        } else {
+          return {
+            user: $scope.username,
+            type: "create",
+            name: args[0]
+          };
+        }
+      };
+
+      var joinRoomCommand = function(args) {
+        if(args.length != 1) {
+          throw "Error: join room command requires one parameter only!";
+        } else {
+          return {
+            user: $scope.username,
+            type: "join",
+            name: args[0]
+          };
+        }
+      };
+
+      var splitted = text.trim().split(' ');
+      var cmd = splitted[0];
+      var args = splitted.slice(1);
+
+      if(cmd == "\\join") {
+        return joinRoomCommand(args);
+      } else if(cmd == "\\create") {
+        return createRoomCommand(args);
+      } else {
+        throw "Error: Invalid command: " + cmd;
+      }
+    };
+
+    var parse_text = function(text) {
+      if(text.trim().startsWith("\\")) {
+        return createCommand(text);
+      } else {
+        return createMessage(text);
+      }
+    };
+
+    $scope.send_message = function() {
+      var text = $scope.msg_text;
+
+      try {
+        
+        $scope.socket.send(JSON.stringify(parse_text(text)));
+        $scope.msg_text = "";
+
+      } catch(e) {
+        $window.alert(e);
+      }
     };
 
     $scope.connect = function() {
@@ -22,6 +96,12 @@ chatApp.controller('chatController', ['$window', '$scope',
       $scope.socket.onopen = function(event) {
         $scope.is_connected = true;
         $scope.$apply();
+
+        var reg_cmd = {
+          name: $scope.username,
+          type: "register"
+        };
+        $scope.socket.send(JSON.stringify(reg_cmd));
       };
 
       $scope.socket.onclose = function(event) {
