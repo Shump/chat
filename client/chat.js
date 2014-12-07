@@ -117,7 +117,7 @@ chatApp.controller('chatController', ['$window', '$scope',
     };
 
     $scope.connect = function() {
-      $scope.socket = new WebSocket("ws://localhost:12345");
+      $scope.socket = new WebSocket("ws://" + $scope.url);
 
       $scope.socket.onopen = function(event) {
         $scope.is_connected = true;
@@ -142,7 +142,7 @@ chatApp.controller('chatController', ['$window', '$scope',
       };
 
       $scope.socket.onmessage = function(event) {
-        $scope.add_new_message(event.data);
+        $scope.add_new_message(JSON.parse(event.data));
         $scope.$apply();
       };
     };
@@ -151,11 +151,11 @@ chatApp.controller('chatController', ['$window', '$scope',
       $scope.socket.close();
     };
 
-    $scope.add_new_message = function(txt) {
+    $scope.add_new_message = function(msg) {
       var message = {
         user: $scope.username,
         url: $scope.url,
-        text: txt
+        text: msg.text
       };
       $scope.messages.push(message);
     };
