@@ -13,14 +13,6 @@
 
 namespace chat {
 
-  namespace priv {
-    template<typename K, typename V>
-    bool key_exists(std::map<K, V> m, K k) {
-      auto search = m.find(k);
-      return search != m.end() ? true : false;
-    };
-  }
-
 
 struct TestMessageHandler {
   void operator()(Context& ctx, websocketpp::connection_hdl hdl, const picojson::object& obj) {
@@ -50,10 +42,13 @@ struct RoomsMessageHandler {
   void operator()(Context& ctx, websocketpp::connection_hdl hdl, const picojson::object& obj) {
     std::cout << "Rooms command recieved!" << std::endl;
 
+    std::string rooms_str = "Available rooms: ";
     for( auto room_pair : ctx.rooms) {
       std::cout << room_pair.first << std::endl;
+      rooms_str += ", " + room_pair.first;
     };
 
+    ctx.server.send(hdl, priv::create_system_msg(rooms_str), websocketpp::frame::opcode::text);
   };
 };
 
@@ -74,12 +69,12 @@ public:
 
   void process_message(Context& ctx, websocketpp::connection_hdl con_hdl, const picojson::object& obj) {
 
-    if(priv::key_exists(obj, std::string("type")) &&
+    if(priv::has_key(obj, std::string("type")) &&
         obj.at("type").is<std::string>()) {
 
       std::string type = obj.at("type").get<std::string>();
 
-      if(priv::key_exists(handlers, type)) {
+      if(priv::has_key(handlers, type)) {
         auto hdl = handlers.at(type);
         hdl(ctx, con_hdl, obj);
       } else {
