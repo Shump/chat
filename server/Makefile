@@ -1,4 +1,4 @@
 
 all:
-	${CXX} -std=c++1y -lboost_system -Iinclude main.cpp
+	${CXX} -std=c++1y -Iinclude main.cpp -lboost_system
 
