@@ -23,16 +23,6 @@ namespace chat {
       auto search = m.find(k);
       return search != m.end() ? true : false;
     };
-
-    std::string create_system_msg(const std::string& text) {
-      typedef picojson::object Object;
-      typedef picojson::value Value;
-      Object obj;
-      obj["type"] = Value("system");
-      obj["text"] = Value(text);
-      
-      return Value(obj).serialize();
-    };
   }
 
 struct JSONSystemEncoder {
@@ -62,28 +52,26 @@ struct Context {
   typedef std::map<std::string, Room> RoomsType;
   RoomsType rooms;
 
-  void broadcast_system_msg(const std::string& msg) {
-    for(auto r : rooms) {
-      for(auto u : r.second) {
-        server.send(u.first, priv::create_system_msg(msg), websocketpp::frame::opcode::text);
-      }
-    }
+  template<typename Encoder = JSONSystemEncoder>
+  void send_msg(websocketpp::connection_hdl hdl, const std::string& msg) {
+    server.send(hdl, Encoder::encode(msg), websocketpp::frame::opcode::text);
   };
 
-  template<typename Encoder>
+  template<typename Encoder = JSONSystemEncoder>
   void broadcast_msg(const std::string& msg) {
     for(auto r : rooms) {
       for(auto u : r.second) {
-        server.send(u.first, Encoder::encode(msg), websocketpp::frame::opcode::text);
+        send_msg<Encoder>(u.first, msg);
       }
     }
   };
 
-  void roomcast_system_msg(const std::string& room, const std::string& msg) {
+  template<typename Encoder = JSONSystemEncoder>
+  void roomcast_msg(const std::string& room, const std::string& msg) {
     if(priv::has_key(rooms, room)) {
       auto r = rooms[room];
       for(auto u : r) {
-        server.send(u.first, priv::create_system_msg(msg), websocketpp::frame::opcode::text);
+        send_msg<Encoder>(u.first, msg);
       }
     } else {
       std::cerr << "roomcast error: " + room + " does not exist!" << std::endl;
@@ -97,6 +85,15 @@ struct Context {
       }
     }
     return boost::optional<std::string>();
+  };
+
+  boost::optional<UserData> get_user_data(websocketpp::connection_hdl hdl) {
+    boost::optional<std::string> room_name = get_room(hdl);
+    if(room_name) {
+      return boost::optional<UserData>(rooms[room_name.get()][hdl]);
+    } else {
+      return boost::optional<UserData>();
+    }
   };
 
   void change_room(websocketpp::connection_hdl hdl, const std::string& new_room) {
