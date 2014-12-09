@@ -87,7 +87,9 @@ int main(int argc, char *argv[]) {
       std::cout << 
         "Unable to convert portnumber: " << argv[1] << ", using defualt port 12345" <<std::endl;
     }
-  };
+  } else {
+    std::cout << "No arguments, defualting listen port to 12345" << std::endl;
+  }
 
   chat::ChatServer server(port);
   server.run();

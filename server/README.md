@@ -2,6 +2,11 @@
 
 Simple chat client and server using websockets.
 
+Usage:
+  ./server [port_number]
+
+  where port_number is the port number to listen for incomming connections at. Defualting to 12345 if not specified.
+
 The client is written using html5 websockets using angular.js as it's framework. I'm relatively inexperienced in JavaScript so it is not very pretty code.
 
 The server is written in c++11 using the websocketspp and picojson libraries.
