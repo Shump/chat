@@ -149,7 +149,7 @@ chatApp.controller('chatController', ['$window', '$scope',
       };
 
       $scope.socket.onerror = function(event) {
-        $window.alert("error!");
+        $window.alert("Unable to connect!");
         $scope.is_connected = false;
         $scope.$apply();
       };
@@ -166,8 +166,6 @@ chatApp.controller('chatController', ['$window', '$scope',
 
     $scope.add_new_message = function(msg) {
       var message = {
-        //user: $scope.username,
-        //url: $scope.url,
         text: msg.text
       };
       $scope.messages.push(message);
