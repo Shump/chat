@@ -10,7 +10,7 @@
 #include <list>
 
 #include "Context.hpp"
-#include "Room.hpp"
+//#include "Room.hpp"
 #include "Messages.hpp"
 
 #include "websocketpp/config/asio_no_tls.hpp"

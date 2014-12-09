@@ -124,7 +124,7 @@ chatApp.controller('chatController', ['$window', '$scope',
         $scope.$apply();
 
         var reg_cmd = {
-          name: $scope.username,
+          user: $scope.username,
           type: "register"
         };
         $scope.socket.send(JSON.stringify(reg_cmd));
@@ -153,8 +153,8 @@ chatApp.controller('chatController', ['$window', '$scope',
 
     $scope.add_new_message = function(msg) {
       var message = {
-        user: $scope.username,
-        url: $scope.url,
+        //user: $scope.username,
+        //url: $scope.url,
         text: msg.text
       };
       $scope.messages.push(message);

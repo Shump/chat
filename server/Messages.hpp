@@ -23,6 +23,14 @@ struct TestMessageHandler {
 struct RegisterMessageHandler {
   void operator()(Context& ctx, websocketpp::connection_hdl hdl, const picojson::object& obj) {
     std::cout << "Register called!" << std::endl;
+
+    std::cout << "User " << obj.at("user") << " entered lobby" << std::endl;
+
+    const std::string& username = obj.at("user").get<std::string>();
+    ctx.rooms["lobby"][hdl] = UserData(username);
+
+    ctx.broadcast_system_msg(username + " joined the chat.");
+
   };
 };
 

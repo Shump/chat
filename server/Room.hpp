@@ -1,26 +1,29 @@
 #ifndef ROOM_HPP
 #define ROOM_HPP 
 
-#include <list>
+#include <map>
 #include <string>
 
 #include "websocketpp/server.hpp"
 
 namespace chat {
 
-struct User {
+struct UserData {
+  UserData(const std::string& name): 
+    name(name) {};
   std::string name;
-  websocketpp::connection_hdl connection;
 };
 
 
-struct Room {
+//struct Room {
+//
+//  std::map<websocketpp::connection_hdl, UserData, 
+//    std::owner_less<websocketpp::connection_hdl>> users;
+//
+//
+//};
 
-  std::list<User> users;
-
-
-};
-
+typedef std::map<websocketpp::connection_hdl, UserData, std::owner_less<websocketpp::connection_hdl>> Room;
 
 }
 
