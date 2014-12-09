@@ -77,15 +77,22 @@ private:
 
 }
 
+int main(int argc, char *argv[]) {
+  int port = 12345;
 
+  if(argc > 1) {
+    try {
+      port = std::stoi(argv[1]);
+    } catch(const std::exception& e) {
+      std::cout << 
+        "Unable to convert portnumber: " << argv[1] << ", using defualt port 12345" <<std::endl;
+    }
+  };
 
-int main() {
-
-  chat::ChatServer server(12345);
+  chat::ChatServer server(port);
   server.run();
 
 }
-
 
 
 
