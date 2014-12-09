@@ -13,9 +13,10 @@
 
 #include <boost/optional.hpp>
 
-//#include "Room.hpp"
-
 namespace chat {
+
+using boost::optional;
+using conn_hdl = websocketpp::connection_hdl;
 
   namespace priv {
     template<typename K, typename V, typename C>
@@ -36,12 +37,11 @@ struct JSONSystemEncoder {
 
 struct UserData {
   UserData() {};
-  UserData(const std::string& name): 
-    name(name) {};
+  UserData(const std::string& name) : name(name) {};
   std::string name;
 };
 
-typedef std::map<websocketpp::connection_hdl, UserData, std::owner_less<websocketpp::connection_hdl>> Room;
+typedef std::map<conn_hdl, UserData, std::owner_less<conn_hdl>> Room;
 
 
 struct Context {
@@ -53,7 +53,7 @@ struct Context {
   RoomsType rooms;
 
   template<typename Encoder = JSONSystemEncoder>
-  void send_msg(websocketpp::connection_hdl hdl, const std::string& msg) {
+  void send_msg(conn_hdl hdl, const std::string& msg) {
     server.send(hdl, Encoder::encode(msg), websocketpp::frame::opcode::text);
   };
 
@@ -78,26 +78,26 @@ struct Context {
     }
   };
   
-  boost::optional<std::string> get_room(websocketpp::connection_hdl hdl) {
+  optional<std::string> get_room(conn_hdl hdl) {
     for(auto& r : rooms) {
       if(priv::has_key(r.second, hdl)) {
-        return boost::optional<std::string>(r.first);
+        return optional<std::string>(r.first);
       }
     }
-    return boost::optional<std::string>();
+    return optional<std::string>();
   };
 
-  boost::optional<UserData> get_user_data(websocketpp::connection_hdl hdl) {
-    boost::optional<std::string> room_name = get_room(hdl);
+  optional<UserData> get_user_data(conn_hdl hdl) {
+    optional<std::string> room_name = get_room(hdl);
     if(room_name) {
-      return boost::optional<UserData>(rooms[room_name.get()][hdl]);
+      return optional<UserData>(rooms[room_name.get()][hdl]);
     } else {
-      return boost::optional<UserData>();
+      return optional<UserData>();
     }
   };
 
-  void change_room(websocketpp::connection_hdl hdl, const std::string& new_room) {
-    boost::optional<std::string> room_name = get_room(hdl);
+  void change_room(conn_hdl hdl, const std::string& new_room) {
+    optional<std::string> room_name = get_room(hdl);
     if(room_name) {
       if(priv::has_key(rooms, new_room)) {
         UserData ud = rooms[room_name.get()][hdl];
@@ -113,8 +113,8 @@ struct Context {
     }
   };
   
-  void remove_user(websocketpp::connection_hdl hdl) {
-    boost::optional<std::string> room_name = get_room(hdl);
+  void remove_user(conn_hdl hdl) {
+    optional<std::string> room_name = get_room(hdl);
     if(room_name) {
       UserData ud = rooms[room_name.get()][hdl];
       rooms[room_name.get()].erase(hdl);

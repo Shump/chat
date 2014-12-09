@@ -4,13 +4,8 @@
 #include <string>
 #include <sstream>
 #include <exception>
-#include <memory>
-
-#include <map>
-#include <list>
 
 #include "Context.hpp"
-//#include "Room.hpp"
 #include "Messages.hpp"
 
 #include "websocketpp/config/asio_no_tls.hpp"
@@ -39,15 +34,16 @@ typedef Context::ServerType Server;
 public:
 
   explicit ChatServer(unsigned int port) {
+    using std::placeholders::_1;
+    using std::placeholders::_2;
 
     Context::RoomsType& rooms = context.rooms;
     Context::ServerType& server = context.server;
 
     rooms["lobby"] = Room();
 
-    server.set_message_handler(std::bind(&ChatServer::on_message, this, 
-          std::placeholders::_1, std::placeholders::_2));
-    server.set_close_handler(std::bind(&ChatServer::on_close, this, std::placeholders::_1));
+    server.set_message_handler(std::bind(&ChatServer::on_message, this, _1, _2));
+    server.set_close_handler(std::bind(&ChatServer::on_close, this, _1));
     
     server.init_asio();
     server.listen(port);
@@ -57,7 +53,6 @@ public:
   void run() {
     context.server.run();
   };
-
 
 private:
 
