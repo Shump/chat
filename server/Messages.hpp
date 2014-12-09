@@ -54,6 +54,16 @@ struct RoomsMessageHandler {
   };
 };
 
+struct RoomMessageHandler {
+  void operator()(Context& ctx, websocketpp::connection_hdl hdl, const picojson::object& obj) {
+    boost::optional<std::string> room_name = ctx.get_room(hdl);
+    if(room_name) {
+      ctx.server.send(hdl, JSONSystemEncoder::encode("Current room: " + room_name.get()),
+          websocketpp::frame::opcode::text);
+    }
+  };
+};
+
 struct CreateMessageHandler {
   void operator()(Context& ctx, websocketpp::connection_hdl hdl, const picojson::object& obj) {
     const std::string& room_name = obj.at("name").get<std::string>();
@@ -79,6 +89,7 @@ public:
     handlers["text"] = TextMessageHandler();
     handlers["users"] = UsersMessageHandler();
     handlers["rooms"] = RoomsMessageHandler();
+    handlers["room"] = RoomMessageHandler();
     handlers["create"] = CreateMessageHandler();
 
   };

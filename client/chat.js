@@ -78,6 +78,17 @@ chatApp.controller('chatController', ['$window', '$scope',
         }
       };
 
+      var roomCommand = function(args) {
+        if(args.length != 0) {
+          throw "Error: room-command does not take any paramters!";
+        } else {
+          return {
+            user: $scope.username,
+            type: "room"
+          };
+        }
+      };
+
       var splitted = text.trim().split(' ');
       var cmd = splitted[0];
       var args = splitted.slice(1);
@@ -90,6 +101,8 @@ chatApp.controller('chatController', ['$window', '$scope',
         return usersCommand(args);
       } else if(cmd == "\\rooms") {
         return roomsCommand(args);
+      } else if(cmd == "\\room") {
+        return roomCommand(args);
       } else {
         throw "Error: Invalid command: " + cmd;
       }
