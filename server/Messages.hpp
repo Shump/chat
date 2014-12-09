@@ -14,12 +14,6 @@
 namespace chat {
 
 
-struct TestMessageHandler {
-  void operator()(Context& ctx, websocketpp::connection_hdl hdl, const picojson::object& obj) {
-    std::cout << "TestMessageHandler called!" << std::endl;
-  };
-};
-
 struct RegisterMessageHandler {
   void operator()(Context& ctx, websocketpp::connection_hdl hdl, const picojson::object& obj) {
     std::cout << "Register called!" << std::endl;
@@ -29,7 +23,7 @@ struct RegisterMessageHandler {
     const std::string& username = obj.at("user").get<std::string>();
     ctx.rooms["lobby"][hdl] = UserData(username);
 
-    ctx.broadcast_system_msg(username + " joined the chat.");
+    ctx.broadcast_msg<JSONSystemEncoder>(username + " joined the chat.");
 
   };
 };
@@ -53,7 +47,7 @@ struct RoomsMessageHandler {
     std::string rooms_str = "Available rooms: ";
     for( auto room_pair : ctx.rooms) {
       std::cout << room_pair.first << std::endl;
-      rooms_str += ", " + room_pair.first;
+      rooms_str += " " + room_pair.first;
     };
 
     ctx.server.send(hdl, priv::create_system_msg(rooms_str), websocketpp::frame::opcode::text);
@@ -67,7 +61,6 @@ public:
 
   MessageManager() {
 
-    handlers["test"] = TestMessageHandler();
     handlers["register"] = RegisterMessageHandler();
     handlers["text"] = TextMessageHandler();
     handlers["users"] = UsersMessageHandler();

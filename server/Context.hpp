@@ -35,6 +35,15 @@ namespace chat {
     };
   }
 
+struct JSONSystemEncoder {
+  static std::string encode(const std::string& text) {
+    picojson::object obj;
+    obj["type"] = picojson::value("system");
+    obj["text"] = picojson::value(text);
+    return picojson::value(obj).serialize();
+  };
+};
+
 struct UserData {
   UserData() {};
   UserData(const std::string& name): 
@@ -57,6 +66,15 @@ struct Context {
     for(auto r : rooms) {
       for(auto u : r.second) {
         server.send(u.first, priv::create_system_msg(msg), websocketpp::frame::opcode::text);
+      }
+    }
+  };
+
+  template<typename Encoder>
+  void broadcast_msg(const std::string& msg) {
+    for(auto r : rooms) {
+      for(auto u : r.second) {
+        server.send(u.first, Encoder::encode(msg), websocketpp::frame::opcode::text);
       }
     }
   };
