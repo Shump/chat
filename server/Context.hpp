@@ -99,9 +99,15 @@ struct Context {
   void change_room(websocketpp::connection_hdl hdl, const std::string& new_room) {
     boost::optional<std::string> room_name = get_room(hdl);
     if(room_name) {
-      UserData ud = rooms[room_name.get()][hdl];
-      rooms[room_name.get()].erase(hdl);
-      rooms[new_room][hdl] = ud;
+      if(priv::has_key(rooms, new_room)) {
+        UserData ud = rooms[room_name.get()][hdl];
+        rooms[room_name.get()].erase(hdl);
+        rooms[new_room][hdl] = ud;
+
+        broadcast_msg("User " + ud.name + " joined room " + new_room);
+      } else {
+        send_msg(hdl, "Room \"" + new_room + "\" does not exist.");
+      }
     } else {
       std::cerr << "Room does not exist for handler" << std::endl;
     }
@@ -110,7 +116,10 @@ struct Context {
   void remove_user(websocketpp::connection_hdl hdl) {
     boost::optional<std::string> room_name = get_room(hdl);
     if(room_name) {
+      UserData ud = rooms[room_name.get()][hdl];
       rooms[room_name.get()].erase(hdl);
+
+      broadcast_msg(ud.name + " left the chat.");
     }
   };
 

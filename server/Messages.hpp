@@ -92,7 +92,6 @@ struct JoinMessageHander {
   void operator()(Context& ctx, websocketpp::connection_hdl hdl, const picojson::object& obj) {
     const std::string& room_name = obj.at("name").get<std::string>();
     ctx.change_room(hdl, room_name);
-    ctx.send_msg(hdl, "Changed room to: " + room_name);
   };
 };
 

@@ -62,8 +62,6 @@ public:
 private:
 
   void on_message(websocketpp::connection_hdl hdl, Server::message_ptr msg) {
-    std::cout << msg->get_payload() << std::endl;
-
     try {
 
       auto val = parse_json_message(msg->get_payload());
@@ -80,15 +78,9 @@ private:
 
   Context context;
   MessageManager msg_manager;
-
-  //Server server;
-
-  //std::map<std::string, Room> rooms;
 };
 
 }
-
-
 
 
 
