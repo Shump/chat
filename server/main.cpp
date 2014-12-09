@@ -69,8 +69,6 @@ private:
       auto val = parse_json_message(msg->get_payload());
       msg_manager.process_message(context, hdl, val);
 
-      //auto msg = create_message<ChatServer>(val);
-
     } catch( const std::exception& ex) {
       std::cerr << ex.what() << std::endl;
     };

@@ -16,15 +16,10 @@ namespace chat {
 
 struct RegisterMessageHandler {
   void operator()(Context& ctx, websocketpp::connection_hdl hdl, const picojson::object& obj) {
-    std::cout << "Register called!" << std::endl;
-
-    std::cout << "User " << obj.at("user") << " entered lobby" << std::endl;
-
     const std::string& username = obj.at("user").get<std::string>();
     ctx.rooms["lobby"][hdl] = UserData(username);
 
     ctx.broadcast_msg<JSONSystemEncoder>(username + " joined the chat.");
-
   };
 };
 
@@ -36,21 +31,40 @@ struct TextMessageHandler {
 
 struct UsersMessageHandler {
   void operator()(Context& ctx, websocketpp::connection_hdl hdl, const picojson::object& obj) {
-    std::cout << "Users command recieved!" << std::endl;
+    std::string msg = "Users connected: ";
+    for(const auto& r : ctx.rooms) {
+      for(const auto& u : r.second) {
+        msg += u.second.name + " ";
+      }
+    }
+
+    ctx.server.send(hdl, JSONSystemEncoder::encode(msg), websocketpp::frame::opcode::text);
   };
 };
 
 struct RoomsMessageHandler {
   void operator()(Context& ctx, websocketpp::connection_hdl hdl, const picojson::object& obj) {
-    std::cout << "Rooms command recieved!" << std::endl;
-
     std::string rooms_str = "Available rooms: ";
     for( auto room_pair : ctx.rooms) {
       std::cout << room_pair.first << std::endl;
       rooms_str += " " + room_pair.first;
     };
 
-    ctx.server.send(hdl, priv::create_system_msg(rooms_str), websocketpp::frame::opcode::text);
+    ctx.server.send(hdl, JSONSystemEncoder::encode(rooms_str), websocketpp::frame::opcode::text);
+  };
+};
+
+struct CreateMessageHandler {
+  void operator()(Context& ctx, websocketpp::connection_hdl hdl, const picojson::object& obj) {
+    const std::string& room_name = obj.at("name").get<std::string>();
+    if(priv::has_key(ctx.rooms, room_name)) {
+      ctx.server.send(hdl, JSONSystemEncoder::encode("Room already exist."), websocketpp::frame::opcode::text);
+    } else {
+      ctx.rooms[room_name] = Room();
+
+      std::string msg = "New room \"" + room_name + "\" created.";
+      ctx.broadcast_msg<JSONSystemEncoder>(msg);
+    }
   };
 };
 
@@ -65,6 +79,7 @@ public:
     handlers["text"] = TextMessageHandler();
     handlers["users"] = UsersMessageHandler();
     handlers["rooms"] = RoomsMessageHandler();
+    handlers["create"] = CreateMessageHandler();
 
   };
 
