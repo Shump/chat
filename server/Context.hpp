@@ -98,6 +98,17 @@ struct Context {
     }
     return boost::optional<std::string>();
   };
+
+  void change_room(websocketpp::connection_hdl hdl, const std::string& new_room) {
+    boost::optional<std::string> room_name = get_room(hdl);
+    if(room_name) {
+      UserData ud = rooms[room_name.get()][hdl];
+      rooms[room_name.get()].erase(hdl);
+      rooms[new_room][hdl] = ud;
+    } else {
+      std::cerr << "Room does not exist for handler" << std::endl;
+    }
+  };
   
   void remove_user(websocketpp::connection_hdl hdl) {
     boost::optional<std::string> room_name = get_room(hdl);

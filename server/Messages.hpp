@@ -33,8 +33,9 @@ struct UsersMessageHandler {
   void operator()(Context& ctx, websocketpp::connection_hdl hdl, const picojson::object& obj) {
     std::string msg = "Users connected: ";
     for(const auto& r : ctx.rooms) {
+      std::string room_name = r.first;
       for(const auto& u : r.second) {
-        msg += u.second.name + " ";
+        msg += u.second.name + "(" + room_name + ") ";
       }
     }
 
@@ -68,13 +69,23 @@ struct CreateMessageHandler {
   void operator()(Context& ctx, websocketpp::connection_hdl hdl, const picojson::object& obj) {
     const std::string& room_name = obj.at("name").get<std::string>();
     if(priv::has_key(ctx.rooms, room_name)) {
-      ctx.server.send(hdl, JSONSystemEncoder::encode("Room already exist."), websocketpp::frame::opcode::text);
+      ctx.server.send(hdl, JSONSystemEncoder::encode("Room already exist."), 
+          websocketpp::frame::opcode::text);
     } else {
       ctx.rooms[room_name] = Room();
 
       std::string msg = "New room \"" + room_name + "\" created.";
       ctx.broadcast_msg<JSONSystemEncoder>(msg);
     }
+  };
+};
+
+struct JoinMessageHander {
+  void operator()(Context& ctx, websocketpp::connection_hdl hdl, const picojson::object& obj) {
+    const std::string& room_name = obj.at("name").get<std::string>();
+    ctx.change_room(hdl, room_name);
+    ctx.server.send(hdl, JSONSystemEncoder::encode("Changed room to: " + room_name),
+        websocketpp::frame::opcode::text);
   };
 };
 
@@ -91,6 +102,7 @@ public:
     handlers["rooms"] = RoomsMessageHandler();
     handlers["room"] = RoomMessageHandler();
     handlers["create"] = CreateMessageHandler();
+    handlers["join"] = JoinMessageHander();
 
   };
 
