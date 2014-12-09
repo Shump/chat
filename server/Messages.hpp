@@ -19,6 +19,7 @@ struct RegisterMessageHandler {
     ctx.rooms["lobby"][hdl] = UserData(username);
 
     ctx.broadcast_msg(username + " joined the chat.");
+    ctx.send_msg(hdl, "Welcome! Available commands are: \\users, \\rooms, \\create {name}, \\join {name}");
   };
 };
 
