@@ -18,8 +18,8 @@
 namespace chat {
 
   namespace priv {
-    template<typename K, typename V>
-    bool has_key(const std::map<K, V>& m, K k) {
+    template<typename K, typename V, typename C>
+    bool has_key(const std::map<K, V, C>& m, K k) {
       auto search = m.find(k);
       return search != m.end() ? true : false;
     };
@@ -72,6 +72,21 @@ struct Context {
     }
   };
   
+  boost::optional<std::string> get_room(websocketpp::connection_hdl hdl) {
+    for(auto& r : rooms) {
+      if(priv::has_key(r.second, hdl)) {
+        return boost::optional<std::string>(r.first);
+      }
+    }
+    return boost::optional<std::string>();
+  };
+  
+  void remove_user(websocketpp::connection_hdl hdl) {
+    boost::optional<std::string> room_name = get_room(hdl);
+    if(room_name) {
+      rooms[room_name.get()].erase(hdl);
+    }
+  };
 
 };
 

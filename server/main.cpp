@@ -47,6 +47,7 @@ public:
 
     server.set_message_handler(std::bind(&ChatServer::on_message, this, 
           std::placeholders::_1, std::placeholders::_2));
+    server.set_close_handler(std::bind(&ChatServer::on_close, this, std::placeholders::_1));
     
     server.init_asio();
     server.listen(port);
@@ -73,6 +74,10 @@ private:
     } catch( const std::exception& ex) {
       std::cerr << ex.what() << std::endl;
     };
+  };
+
+  void on_close(websocketpp::connection_hdl hdl) {
+    context.remove_user(hdl);
   };
 
   Context context;
