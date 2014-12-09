@@ -25,7 +25,17 @@ struct RegisterMessageHandler {
 
 struct TextMessageHandler {
   void operator()(Context& ctx, websocketpp::connection_hdl hdl, const picojson::object& obj) {
-    std::cout << "Text message recieved!" << std::endl;
+    const std::string& text = obj.at("text").get<std::string>();
+
+    boost::optional<std::string> room_name = ctx.get_room(hdl);
+    boost::optional<UserData> ud = ctx.get_user_data(hdl);
+    if(ud || room_name) {
+      std::string format_msg = ud.get().name + ": " + text;
+      ctx.roomcast_msg(room_name.get(), format_msg);
+    } else {
+      std::cerr << "No user data for handle" << std::endl;
+    }
+    
   };
 };
 
