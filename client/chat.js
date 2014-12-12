@@ -1,5 +1,6 @@
 
 
+// Add 'startsWith' method if not existing.
 if(typeof String.prototype.startsWith != 'function') {
   String.prototype.startsWith = function(str){
     return this.slice(0, str.length) == str;
@@ -120,6 +121,7 @@ chatApp.controller('chatController', ['$window', '$scope',
     };
 
     $scope.send_message = function() {
+      $window.alert("sending message");
       var text = $scope.my_data.msg_text;
 
       try {
@@ -133,6 +135,9 @@ chatApp.controller('chatController', ['$window', '$scope',
     };
 
     $scope.my_data.connect = function() {
+      if(!check_login()) {
+        return;
+      }
       $scope.my_data.socket = new WebSocket("ws://" + $scope.my_data.url);
 
       $scope.my_data.socket.onopen = function(event) {
@@ -177,9 +182,27 @@ chatApp.controller('chatController', ['$window', '$scope',
       $scope.my_data.messages.push(message);
     };
 
+    var check_username = function(name) {
+      return name && name.trim() != "";
+    };
 
-    $scope.my_data.my_alert = function(txt) {
-      $window.alert(txt);
+    var check_url = function(url) {
+      if(!url) {
+        return false;
+      }
+      var splitted = url.split(":");
+      if(splitted.length != 2) {
+        $window.alert("Enter serveradress in the following format: url:portnr.");
+        return false;
+      } else {
+        //TODO: Check splitted[0] is url and splitted[1] is number
+        return true;
+      }
+    };
+
+    check_login = function() {
+      return check_username($scope.my_data.username) && 
+             check_url($scope.my_data.url);
     };
 
 }]);
