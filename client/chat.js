@@ -12,13 +12,16 @@ var chatApp = angular.module('chatClient', []);
 
 chatApp.controller('chatController', ['$window', '$scope', 
   function($window, $scope) {
-    $scope.is_connected = false;
+    $scope.my_data = {};
+    $scope.my_data.cur_window = "chat";
 
-    $scope.messages = [];
+    $scope.my_data.is_connected = false;
+
+    $scope.my_data.messages = [];
 
     var createMessage = function(text) {
       return {
-        user: $scope.username,
+        user: $scope.my_data.username,
         text: text,
         type: "text"
       };
@@ -27,7 +30,7 @@ chatApp.controller('chatController', ['$window', '$scope',
     var createCommand = function(text) {
       var registerCommand = function() {
         return {
-          user: $scope.username,
+          user: $scope.my_data.username,
           type: "register"
         };
       };
@@ -37,7 +40,7 @@ chatApp.controller('chatController', ['$window', '$scope',
           throw "Error: create room command requires one parameter only!";
         } else {
           return {
-            user: $scope.username,
+            user: $scope.my_data.username,
             type: "create",
             name: args[0]
           };
@@ -49,7 +52,7 @@ chatApp.controller('chatController', ['$window', '$scope',
           throw "Error: join room command requires one parameter only!";
         } else {
           return {
-            user: $scope.username,
+            user: $scope.my_data.username,
             type: "join",
             name: args[0]
           };
@@ -61,7 +64,7 @@ chatApp.controller('chatController', ['$window', '$scope',
           throw "Error: users command does not take any parameters!";
         } else {
           return {
-            user: $scope.username,
+            user: $scope.my_data.username,
             type: "users"
           };
         }
@@ -72,7 +75,7 @@ chatApp.controller('chatController', ['$window', '$scope',
           throw "Error: rooms-command does not take any parameters!";
         } else {
           return {
-            user: $scope.username,
+            user: $scope.my_data.username,
             type: "rooms"
           };
         }
@@ -83,7 +86,7 @@ chatApp.controller('chatController', ['$window', '$scope',
           throw "Error: room-command does not take any paramters!";
         } else {
           return {
-            user: $scope.username,
+            user: $scope.my_data.username,
             type: "room"
           };
         }
@@ -117,62 +120,62 @@ chatApp.controller('chatController', ['$window', '$scope',
     };
 
     $scope.send_message = function() {
-      var text = $scope.msg_text;
+      var text = $scope.my_data.msg_text;
 
       try {
         
-        $scope.socket.send(JSON.stringify(parse_text(text)));
-        $scope.msg_text = "";
+        $scope.my_data.socket.send(JSON.stringify(parse_text(text)));
+        $scope.my_data.msg_text = "";
 
       } catch(e) {
         $window.alert(e);
       }
     };
 
-    $scope.connect = function() {
-      $scope.socket = new WebSocket("ws://" + $scope.url);
+    $scope.my_data.connect = function() {
+      $scope.my_data.socket = new WebSocket("ws://" + $scope.my_data.url);
 
-      $scope.socket.onopen = function(event) {
-        $scope.is_connected = true;
+      $scope.my_data.socket.onopen = function(event) {
+        $scope.my_data.is_connected = true;
         $scope.$apply();
 
         var reg_cmd = {
-          user: $scope.username,
+          user: $scope.my_data.username,
           type: "register"
         };
-        $scope.socket.send(JSON.stringify(reg_cmd));
+        $scope.my_data.socket.send(JSON.stringify(reg_cmd));
       };
 
-      $scope.socket.onclose = function(event) {
-        $scope.is_connected = false;
+      $scope.my_data.socket.onclose = function(event) {
+        $scope.my_data.is_connected = false;
         $scope.$apply();
       };
 
-      $scope.socket.onerror = function(event) {
+      $scope.my_data.socket.onerror = function(event) {
         $window.alert("Unable to connect!");
-        $scope.is_connected = false;
+        $scope.my_data.is_connected = false;
         $scope.$apply();
       };
 
-      $scope.socket.onmessage = function(event) {
-        $scope.add_new_message(JSON.parse(event.data));
+      $scope.my_data.socket.onmessage = function(event) {
+        $scope.my_data.add_new_message(JSON.parse(event.data));
         $scope.$apply();
       };
     };
 
-    $scope.disconnect = function() {
-      $scope.socket.close();
+    $scope.my_data.disconnect = function() {
+      $scope.my_data.socket.close();
     };
 
-    $scope.add_new_message = function(msg) {
+    $scope.my_data.add_new_message = function(msg) {
       var message = {
         text: msg.text
       };
-      $scope.messages.push(message);
+      $scope.my_data.messages.push(message);
     };
 
 
-    $scope.my_alert = function(txt) {
+    $scope.my_data.my_alert = function(txt) {
       $window.alert(txt);
     };
 
