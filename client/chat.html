@@ -16,7 +16,9 @@
 
   <div id="input-window">
 
-      <input type="text" id="message-input" ng-model="my_data.msg_text" ng-keyup='$event.keyCode == 13 && my_data.send_message()'>
+      <form ng-submit="my_data.send_message()">
+        <input type="text" id="message-input" ng-model="my_data.msg_text">
+      </form>
 
   </div>
 

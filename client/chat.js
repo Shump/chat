@@ -120,7 +120,7 @@ chatApp.controller('chatController', ['$window', '$scope',
       }
     };
 
-    $scope.send_message = function() {
+    $scope.my_data.send_message = function() {
       $window.alert("sending message");
       var text = $scope.my_data.msg_text;
 
