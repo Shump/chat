@@ -14,33 +14,15 @@
 <body ng-controller="chatController">
 
 <div ng-switch="my_data.cur_window">
-  <div ng-switch-when="chat">
 
-<div id="chat-window">
-  <div id="connection-window">
-
-    User name:<input type="text" ng-model="my_data.username"><br>
-    URL:<input type="text" ng-model="my_data.url"><br>
-    <button ng-click="my_data.is_connected ? my_data.disconnect() : my_data.connect()">{{my_data.is_connected ? "Disconnect" : "Connect"}}</button>Connected: {{my_data.is_connected}}
-    
-  </div>
-
-  <div id="messages-window">
-    <div ng-repeat="msg in my_data.messages" class="message">
-      {{msg.text}}
-    </div>
-
-  </div>
-
-  <div id="input-window">
-
-      <input type="text" id="message-input" ng-model="my_data.msg_text" ng-keyup='$event.keyCode == 13 && my_data.send_message()'>
-
-  </div>
-
+<div ng-switch-when="chat">
+  <div ng-include="'./chat.html'"></div>
 </div>
 
+<div ng-switch-when="login">
+  <div ng-include="'./login.html'"></div>
 </div>
+
 </div>
   
 </body>

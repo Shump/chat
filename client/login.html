@@ -1,0 +1,33 @@
+
+
+<div class="pure-g">
+  <div class="pure-u-1-5"></div>
+  <div class="pure-u-1-5"></div>
+
+  <div class="pure-u-1-5">
+  <div id="login-window" class="window">
+
+    <form class="pure-form pure-form-stacked" ng-submit="my_data.connect()">
+    <fieldset class="pure-group">
+      <legend><center>Login</center></legend>
+      <input type="text" 
+        placeholder="nickname" 
+        class="pure-input-1" 
+        ng-model="my_data.username" 
+        required>
+      <input type="text" 
+        placeholder="serverurl:port" 
+        class="pure-input-1" 
+        ng-model="my_data.url" 
+        required>
+        <center>
+          <button ng-click="my_data.connect()" class="button">Connect</button>
+        </center>
+    </fieldset>
+    </form>
+
+  </div>
+  </div>
+
+</div>
+

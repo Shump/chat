@@ -13,7 +13,7 @@ var chatApp = angular.module('chatClient', []);
 chatApp.controller('chatController', ['$window', '$scope', 
   function($window, $scope) {
     $scope.my_data = {};
-    $scope.my_data.cur_window = "chat";
+    $scope.my_data.cur_window = "login";
 
     $scope.my_data.is_connected = false;
 
@@ -137,6 +137,7 @@ chatApp.controller('chatController', ['$window', '$scope',
 
       $scope.my_data.socket.onopen = function(event) {
         $scope.my_data.is_connected = true;
+        $scope.my_data.cur_window = "chat";
         $scope.$apply();
 
         var reg_cmd = {
@@ -148,12 +149,14 @@ chatApp.controller('chatController', ['$window', '$scope',
 
       $scope.my_data.socket.onclose = function(event) {
         $scope.my_data.is_connected = false;
+        $scope.my_data.cur_window = "login";
         $scope.$apply();
       };
 
       $scope.my_data.socket.onerror = function(event) {
         $window.alert("Unable to connect!");
         $scope.my_data.is_connected = false;
+        $scope.my_data.cur_window = "login";
         $scope.$apply();
       };
 

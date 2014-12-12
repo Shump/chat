@@ -1,0 +1,24 @@
+
+<div id="chat-window" class="window">
+
+  <div id="connection-window">
+
+    <button ng-click="my_data.disconnect()">Disconnect</button>
+    
+  </div>
+
+  <div id="messages-window">
+    <div ng-repeat="msg in my_data.messages" class="message">
+      {{msg.text}}
+    </div>
+
+  </div>
+
+  <div id="input-window">
+
+      <input type="text" id="message-input" ng-model="my_data.msg_text" ng-keyup='$event.keyCode == 13 && my_data.send_message()'>
+
+  </div>
+
+</div>
+
